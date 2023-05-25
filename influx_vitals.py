@@ -2,7 +2,7 @@ import datetime
 import yaml
 import influxdb_client
 import warnings
-from env_config import settings, ENVIRONEMENT
+from env_config import settings, ENVIRONMENT
 from influxdb_client.client.write_api import SYNCHRONOUS
 from apscheduler.schedulers.blocking import BlockingScheduler
 from services.cpu_service import ServiceCPU
@@ -59,11 +59,11 @@ def send_vitals(jobconfig):
 		warnings.warn(f"Returned queries was empty for service method {service_key}")
 		return
 
-	if settings.ENVIRONEMENT == ENVIRONEMENT.DEV:
+	if settings.ENVIRONMENT == ENVIRONMENT.DEV:
 		ts = datetime.datetime.now(datetime.timezone.utc)
 		for query_index in range(len(queries)):
 			logger.write('{0}: SERVICE {1} -> {2}\n'.format(ts.isoformat(), service_name, queries[query_index]))
-	elif settings.ENVIRONEMENT == ENVIRONEMENT.PROD:
+	elif settings.ENVIRONMENT == ENVIRONMENT.PROD:
 		record = influx_query_builder(queries=queries, service_name=service_name, params=params)
 		write_api.write(bucket=settings.INFLUX_BUCKET, org=settings.INFLUX_ORG, record=record)
 
