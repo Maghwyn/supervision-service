@@ -1,8 +1,8 @@
-import time
+import datetime
 import yaml
 import influxdb_client
 import warnings
-from env_config import settings
+from env_config import settings, ENVIRONEMENT
 from influxdb_client.client.write_api import SYNCHRONOUS
 from apscheduler.schedulers.blocking import BlockingScheduler
 from services.cpu_service import ServiceCPU
@@ -28,17 +28,44 @@ services = {
 	ServiceNetwork.service_name: ServiceNetwork,
 }
 
+def influx_query_builder(queries, service_name: str, params):
+	for query_index in range(len(queries)):
+		point = influxdb_client.Point('system')
+		point.tag("agent", settings.AGENT_NAME)
+		point.tag(service_name, getattr(queries[query_index], 'tagValue'))
+		# this breaks if we have more than 1 params
+		if params is not None:
+			for key, value in params.items():
+				point.tag(key, value)
+
+		for field in queries[query_index].get('fields'):
+			for key, value in field.items():
+				point.field(key, value)
+
+		return point
+
+
 def send_vitals(jobconfig):
+	service_name = jobconfig.get('service_name')
+	service_key = jobconfig.get('service_key')
+	params = jobconfig.get('params')
+
 	queries = jobconfig.get('service_method')(
-		serviceKey=jobconfig.get('service_key'),
-		attr=jobconfig.get('attr', None),
-		params=jobconfig.get('params', None),
+		serviceKey=service_key,
+		attr=jobconfig.get('attr'),
+		params=params,
 	)
 	if not queries:
-		warnings.warn(f"Returned queries was empty for service name {jobconfig.get('service_name')}")
+		warnings.warn(f"Returned queries was empty for service method {service_key}")
 		return
 
-	print(queries)
+	if settings.ENVIRONEMENT == ENVIRONEMENT.DEV:
+		ts = datetime.datetime.now(datetime.timezone.utc)
+		for query_index in range(len(queries)):
+			logger.write('{0}: SERVICE {1} -> {2}\n'.format(ts.isoformat(), service_name, queries[query_index]))
+	elif settings.ENVIRONEMENT == ENVIRONEMENT.PROD:
+		record = influx_query_builder(queries=queries, service_name=service_name, params=params)
+		write_api.write(bucket=settings.INFLUX_BUCKET, org=settings.INFLUX_ORG, record=record)
 
 
 def register_job(scheduler):
