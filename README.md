@@ -171,7 +171,7 @@ To install and setup the script, follow the instruction :
    ```
 7. Create your environment
     ```sh
-    touch .env
+    nano .env
     ```
 8. Setup your environment
     ```md
@@ -217,7 +217,7 @@ sudo systemctl status vitals.service
 <!-- LICENSE -->
 ## License
 
-Distributed under the MIT License. See `LICENSE.txt` for more information.
+Distributed under the MIT License. See `LICENSE` for more information.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
