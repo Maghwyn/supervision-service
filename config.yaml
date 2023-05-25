@@ -1,0 +1,93 @@
+services:
+ cpu:
+  cpu_times:
+   active: true
+   percpu: true
+   attributes:
+    user: true
+    system: true
+    idle: true
+  cpu_percent:
+   active: true
+   percpu: true
+  cpu_times_percent:
+   active: true
+   percpu: true
+  cpu_stats:
+   active: true
+   attributes:
+    ctx_switches: true
+    interrupts: true
+    soft_interrupts: true
+    syscalls: true
+ disks:
+  disk_usage:
+   active: true
+   attributes:
+    total: true
+    used: true
+    free: true
+    percent: true
+  disk_io_counters:
+   active: true
+   perdisk: true
+    read_count: true
+    write_count: true
+    read_bytes: true
+    write_bytes: true
+ memory:
+  virtual_memory:
+   active: true
+   attributes:
+    total: true
+    available: true
+    percent: true
+    used: true
+    free: true
+  swap_memory:
+   active: true
+   attributes:
+    total: true
+    used: true
+    free: true
+    percent: true
+    sin: true
+    sout: true
+ network:
+  net_io_counters:
+   active: true
+   pernic: true
+   attributes:
+    bytes_sent: true
+    bytes_recv: true
+    packets_sent: true
+    packets_recv: true
+    errin: true
+    errout: true
+    dropin: true
+    dropout: true
+  net_connections:
+   active: true
+   kind: 'inet'
+   attributes:
+    fd: true
+    family: true
+    type: true
+    laddr: true
+    raddr: true
+    status: true
+    pid: true
+  net_if_addrs:
+   active: false
+  net_if_stats:
+   active: true
+   attributes:
+    isup: true
+    duplex: true
+    speed: true
+    mtu: true
+    flags: true
+
+
+
+ 
