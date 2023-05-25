@@ -7,7 +7,9 @@ from services.types import Attributes
 class ServiceCPU:
 	service_name = "cpu"
 
-	def cpu_times(serviceKey: str, attr: Attributes, percpu = False):
+	def cpu_times(serviceKey: str, **kwargs):
+		attr: Attributes = kwargs['attr']
+		percpu: bool = kwargs['params'].get('percpu')
 		result = psutil.cpu_times(percpu=percpu)
 		if not percpu:
 			result = [result]
@@ -17,25 +19,28 @@ class ServiceCPU:
 			if not active:
 				pass
 
-			fields = [{f"{serviceKey}-{cpu_index}": result[cpu_index][attr_name]} for cpu_index in range(len(result))]
+			fields = [{f"{serviceKey}-{cpu_index}": getattr(result[cpu_index], attr_name, None)} for cpu_index in range(len(result))]
 			queries.append({ "tagValue": attr_name, "fields": fields })
 
 		return queries
 
-	def cpu_percent(serviceKey: str, percpu = False):
+	def cpu_percent(serviceKey: str, **kwargs):
+		percpu: bool = kwargs['params'].get('percpu')
 		result = psutil.cpu_percent(percpu=percpu)
 		if not percpu:
 			result = [result]
 
 		queries = []
-		if all(result) == 0.0 or all(result) == None:
+		if all(element == 0.0 for element in result) or all(element == None for element in result):
 			return queries
-  
+
 		fields = [{f"{serviceKey}-{cpu_index}": result[cpu_index]} for cpu_index in range(len(result))]
 		queries.append({ "tagValue": "percent", "fields": fields })
 		return queries
 
-	def cpu_times_percent(serviceKey: str, attr: Attributes, percpu = False):
+	def cpu_times_percent(serviceKey: str, **kwargs):
+		attr: Attributes = kwargs['attr']
+		percpu: bool = kwargs['params'].get('percpu')
 		result = psutil.cpu_times_percent(percpu=percpu)
 		if not percpu:
 			result = [result]
@@ -45,20 +50,21 @@ class ServiceCPU:
 			if not active:
 				pass
 
-			fields = [{f"{serviceKey}-{cpu_index}": result[cpu_index][attr_name]} for cpu_index in range(len(result))]
+			fields = [{f"{serviceKey}-{cpu_index}": getattr(result[cpu_index], attr_name, None)} for cpu_index in range(len(result))]
 			queries.append({ "tagValue": attr_name, "fields": fields })
 
 		return queries
 
-	def cpu_stats(serviceKey: str, attr: Attributes):
+	def cpu_stats(serviceKey: str, **kwargs):
+		attr: Attributes = kwargs['attr']
 		result = [psutil.cpu_stats()]
-  
+
 		queries = []
 		for attr_name, active in attr.items():
 			if not active:
 				pass
 
-			fields = [{f"{serviceKey}-{cpu_index}": result[cpu_index][attr_name]} for cpu_index in range(len(result))]
+			fields = [{f"{serviceKey}-{cpu_index}": getattr(result[cpu_index], attr_name, None)} for cpu_index in range(len(result))]
 			queries.append({ "tagValue": attr_name, "fields": fields })
 
 		return queries

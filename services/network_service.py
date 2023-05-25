@@ -6,7 +6,9 @@ from services.types import Attributes
 class ServiceNetwork:
 	service_name = "network"
 
-	def net_io_counters(serviceKey: str, attr: Attributes, pernic = False):
+	def net_io_counters(serviceKey: str, **kwargs):
+		attr: Attributes = kwargs['attr']
+		pernic: bool = kwargs['params'].get('pernic')
 		result = psutil.net_io_counters(pernic=pernic)
 		if not pernic:
 			result = { "global": result }
@@ -16,15 +18,19 @@ class ServiceNetwork:
 			if not active:
 				pass
 
-			fields = [{f"{serviceKey}-{network_name}": snetio[attr_name]} for network_name, snetio in result.items()]
+			fields = [{f"{serviceKey}-{network_name}": getattr(snetio, attr_name, None)} for network_name, snetio in result.items()]
 			queries.append({ "tagValue": attr_name, "fields": fields })
 
 		return queries
 
-	def net_if_addrs(serviceKey: str, attr: Attributes):
+	def net_if_addrs(serviceKey: str, **kwargs):
+		attr: Attributes = kwargs['attr']
 		return []
 
-	def net_connections(serviceKey: str, attr: Attributes, kind = 'inet'):
+	# Require root permissions on certain OS
+	def net_connections(serviceKey: str, **kwargs):
+		attr: Attributes = kwargs['attr']
+		kind: str = kwargs['params'].get('kind')
 		result = psutil.net_connections(kind=kind)
 
 		queries = []
@@ -32,12 +38,13 @@ class ServiceNetwork:
 			if not active:
 				pass
 
-			fields = [{f"{serviceKey}-{memory_index}": result[memory_index][attr_name]} for memory_index in range(len(result))]
+			fields = [{f"{serviceKey}-{net_index}": getattr(result[net_index], attr_name, None)} for net_index in range(len(result))]
 			queries.append({ "tagValue": attr_name, "fields": fields })
 
 		return queries
 
-	def net_if_stats(serviceKey: str, attr: Attributes):
+	def net_if_stats(serviceKey: str, **kwargs):
+		attr: Attributes = kwargs['attr']
 		result = psutil.net_if_stats()
 
 		queries = []
@@ -45,7 +52,7 @@ class ServiceNetwork:
 			if not active:
 				pass
 
-			fields = [{f"{serviceKey}-{disk_name}": diskio[attr_name]} for disk_name, diskio in result.items()]
+			fields = [{f"{serviceKey}-{snic_name}": getattr(snicstats, attr_name, None)} for snic_name, snicstats in result.items()]
 			queries.append({ "tagValue": attr_name, "fields": fields })
 
 		return queries
