@@ -60,6 +60,7 @@ You can check your installed version of python with `ls ~/.pyenv/versions/`
 
 ** Kevin you  do your work here **
 
+----
 
 ### Installation
 
@@ -109,7 +110,7 @@ To install and setup the script, follow the instruction :
    bash linux_daemon_installer.sh
    ```
 
-
+----
 
 ### Additional information
 
