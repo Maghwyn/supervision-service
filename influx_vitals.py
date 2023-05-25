@@ -4,7 +4,7 @@ import influxdb_client
 import warnings
 from env_config import settings
 from influxdb_client.client.write_api import SYNCHRONOUS
-from apscheduler.schedulers.blocking import BackgroundScheduler
+from apscheduler.schedulers.blocking import BlockingScheduler
 from services.cpu_service import ServiceCPU
 from services.disks_service import ServiceDisks
 from services.memory_service import ServiceMemory
@@ -29,10 +29,11 @@ services = {
 }
 
 def register_job(scheduler):
-	if yamlConfig.get('services' is None):
-		raise Exception('condig.yaml services is not defined')
+	vitalsServices = yamlConfig.get('services', None)
+	if vitalsServices is None:
+		raise Exception('config.yaml services is not defined')
 
-	for service_name, service_config in yamlConfig.get('services').items():
+	for service_name, service_config in vitalsServices.items():
 		if services.get(service_name, None) is None:
 			raise Exception(f'{service_name} does not exist as a service, please verify your yaml configuration')
 
@@ -46,15 +47,15 @@ def register_job(scheduler):
 				service_method = getattr(service, method_name)
 				queries = service_method(
 					serviceKey=method_name,
-					attr=method_config('attributes', None),
-					param=method_config('parameter', None),
+					attr=method_config.get('attributes', None),
+					params=method_config.get('params', None),
 				)
-				print(queries)
+				print(method_name, queries)
 			else:
 				warnings.warn(f"Psutil ${service_name} function does not exist, please verify the yaml configuration file")
 
 
 def run_influx_vitals():
-	scheduler = BackgroundScheduler()
+	scheduler = BlockingScheduler()
 	register_job(scheduler)
 	scheduler.start()
