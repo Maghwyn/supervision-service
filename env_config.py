@@ -4,16 +4,16 @@ class DATABASE:
 	INFLUX = 'influx'
 	PROMETHEUS = "prometheus"
 
-class ENVIRONEMENT:
+class ENVIRONMENT:
 	DEV = 'dev'
 	PROD = 'production'
 
 class Settings():
-	""" Utils settings using environements variables
+	""" Utils settings using environments variables
 	"""
 	AGENT_NAME: str = env_loader["AGENT_NAME"]
 	TSDB_NAME: str = env_loader["TSDB_NAME"]
-	ENVIRONEMENT: str = env_loader["ENVIRONEMENT"]
+	ENVIRONMENT: str = env_loader["ENVIRONMENT"]
 	if TSDB_NAME == DATABASE.INFLUX:
 		INFLUX_BUCKET: str = env_loader["INFLUX_BUCKET"]
 		INFLUX_ORG: str = env_loader["INFLUX_ORG"]

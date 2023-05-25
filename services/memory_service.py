@@ -6,7 +6,7 @@ from services.types import Attributes
 class ServiceMemory:
 	service_name = "memory"
 
-	def virtual_memory(serviceKey: str, **kwargs):
+	def virtual_memory(service_key: str, **kwargs):
 		attr: Attributes = kwargs['attr']
 		result = psutil.virtual_memory()
 		queries = []
@@ -14,12 +14,12 @@ class ServiceMemory:
 			if not active:
 				pass
 
-			fields = [{f"{serviceKey}-{memory_index}": getattr(result[memory_index], attr_name, None)} for memory_index in range(len(result))]
+			fields = [{f"{service_key}-{memory_index}": getattr(result[memory_index], attr_name, None)} for memory_index in range(len(result))]
 			queries.append({ "tagValue": attr_name, "fields": fields })
 
 		return queries
 
-	def swap_memory(serviceKey: str, **kwargs):
+	def swap_memory(service_key: str, **kwargs):
 		attr: Attributes = kwargs['attr']
 		result = psutil.swap_memory()
 
@@ -28,7 +28,7 @@ class ServiceMemory:
 			if not active:
 				pass
 
-			fields = [{f"{serviceKey}-{memory_index}": getattr(result[memory_index], attr_name, None)} for memory_index in range(len(result))]
+			fields = [{f"{service_key}-{memory_index}": getattr(result[memory_index], attr_name, None)} for memory_index in range(len(result))]
 			queries.append({ "tagValue": attr_name, "fields": fields })
 
 		return queries
