@@ -34,10 +34,10 @@ def register_job(scheduler):
 		raise Exception('config.yaml services is not defined')
 
 	for service_name, service_config in vitalsServices.items():
-		if services.get(service_name, None) is None:
-			raise Exception(f'{service_name} does not exist as a service, please verify your yaml configuration')
+		service = services.get(service_name, None)
 
-		service = services.get(service_name)
+		if service is None:
+			raise Exception(f'{service} does not exist as a service, please verify your yaml configuration')
 
 		for method_name, method_config in service_config.items():
 			if method_config.get('active') is not True:
@@ -50,9 +50,14 @@ def register_job(scheduler):
 					attr=method_config.get('attributes', None),
 					params=method_config.get('params', None),
 				)
+
+				if not queries:
+					warnings.warn(f"Returned queries was empty for service name {service}")
+					pass
+
 				print(method_name, queries)
 			else:
-				warnings.warn(f"Psutil ${service_name} function does not exist, please verify the yaml configuration file")
+				warnings.warn(f"Psutil ${service} function does not exist or is not supported, please verify the yaml configuration file")
 
 
 def run_influx_vitals():
