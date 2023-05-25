@@ -130,9 +130,9 @@ To run the script, do the following :
 If you're using the daemon instead and did not accept the script to launch the daemon for you, do the following in order:
 
 ```sh
-sudo systemctl daemon-reload;
-sudo systemctl start vitals.service;
-sudo systemctl status vitals.service;
+sudo systemctl daemon-reload
+sudo systemctl start vitals.service
+sudo systemctl status vitals.service
 ```
 
 
