@@ -28,6 +28,19 @@ services = {
 	ServiceNetwork.service_name: ServiceNetwork,
 }
 
+def send_vitals(jobconfig):
+	queries = jobconfig.get('service_method')(
+		serviceKey=jobconfig.get('service_key'),
+		attr=jobconfig.get('attr', None),
+		params=jobconfig.get('params', None),
+	)
+	if not queries:
+		warnings.warn(f"Returned queries was empty for service name {jobconfig.get('service_name')}")
+		return
+
+	print(queries)
+
+
 def register_job(scheduler):
 	vitalsServices = yamlConfig.get('services', None)
 	if vitalsServices is None:
@@ -44,20 +57,16 @@ def register_job(scheduler):
 				pass
 
 			if hasattr(service, method_name):
-				service_method = getattr(service, method_name)
-				queries = service_method(
-					serviceKey=method_name,
-					attr=method_config.get('attributes', None),
-					params=method_config.get('params', None),
-				)
-
-				if not queries:
-					warnings.warn(f"Returned queries was empty for service name {service}")
-					pass
-
-				print(method_name, queries)
+				jobconfig = {}
+				jobconfig.update({ "service_method": getattr(service, method_name) })
+				jobconfig.update({ "service_name": service_name })
+				jobconfig.update({ "service_key": method_name })
+				jobconfig.update({ "attr": method_config.get('attributes', None) })
+				jobconfig.update({ "params": method_config.get('params', None) })
+				interval = method_config.get('interval', 10)
+				scheduler.add_job(send_vitals, 'interval', seconds=interval, args=[jobconfig], id=method_name)
 			else:
-				warnings.warn(f"Psutil ${service} function does not exist or is not supported, please verify the yaml configuration file")
+				warnings.warn(f"Psutil ${method_name} function does not exist or is not supported, please verify the yaml configuration file")
 
 
 def run_influx_vitals():
