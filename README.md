@@ -45,7 +45,7 @@ echo command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH" >> ~/.pr
 echo eval "$(pyenv init -)" >> ~/.profile
 ```
 
-Once you have acces to pyenv in your terminal, install python 3.10 with `sudo pyenv install 3.10`, this will download a tar of the specified version.
+Once you have access to pyenv in your terminal, install python 3.10 with `sudo pyenv install 3.10`, this will download a tar of the specified version.
 - If you're running into the error : **"no acceptable C compiler found in $PATH"**, just run `sudo apt install build-essential` then rerun the command.
 - If you're running into an error where the last line is **"[Makefile:1280: install] Error 1"** and a bunch of array index referencing pip and numpy, try pasting the log file as follow : `cat /tmp/python-build.<number>.<number>.log` from the error log. If you can find "no module named zlib" in the log, run the following command `sudo apt install zlib1g zlib1g-dev libssl-dev libbz2-dev libsqlite3-dev` as stated in the wiki of [pyenv](https://github.com/pyenv/pyenv/wiki/Common-build-problems#build-failed-error-the-python-zlib-extension-was-not-compiled-missing-the-zlib), then rerun the command.
 
@@ -56,9 +56,87 @@ You can check your installed version of python with `ls ~/.pyenv/versions/`
 
 ----
 
-#### **The second machine** will host influxDB and Prometheus
+#### **The second machine** will host influxDB, Prometheus and Grafana
 
-** Kevin you  do your work here **
+Connect as a root and download sudo with `apt update && apt install sudo`.\
+Then run the following to add the user into the sudo group `usermod -aG sudo <yourUsername>` and logout the root user.\
+Login as `<yourUSername>` and install wget and curl as follow `sudo apt-get -y install wget curl`.
+
+#### **Install Prometheus**
+```sh
+sudo mkdir /etc/prometheus
+sudo mkdir /var/lib/prometheus
+sudo chown -R <user>:sudo /etc/prometheus
+sudo chown -R <user>:sudo /var/lib/prometheus
+
+sudo apt-get update
+mkdir -p /tmp/prometheus && cd /tmp/prometheus
+curl -s https://api.github.com/repos/prometheus/prometheus/releases/latest%7Cgrep browser_download_url|grep linux-amd64|cut -d '"' -f 4|wget -qi -
+```
+Once you did that, you can start the daemon service and delete the temp folder.
+```sh
+sudo mv prometheus promtool /usr/local/bin
+sudo mv prometheus.yml  /etc/prometheus/prometheus.yml
+sudo mv consoles/ console_libraries/ /etc/prometheus/
+
+cd ~/
+rm -rf /tmp/prometheus
+```
+
+#### **Install InfluxDb**
+```sh
+mkdir -p /tmp/influxdb && cd /tmp/influxdb
+wget https://dl.influxdata.com/influxdb/releases/influxdb2-2.7.0-amd64.deb
+sudo dpkg -i influxdb2-2.7.0-amd64.deb
+
+mkdir -p /tmp/influxdb-cli && cd /tmp/influxdb-cli
+wget https://dl.influxdata.com/influxdb/releases/influxdb2-client-2.7.0-linux-amd64.tar.gz
+tar xvzf influxdb2-client-2.7.0-linux-amd64.tar.gz
+sudo cp influx /usr/local/bin
+```
+Once you did that, you can start the daemon service and delete the temp folders.
+```sh
+sudo systemctl daemon-reload
+sudo service influxdb start
+sudo service influxdb status
+
+cd ~/
+rm -rf /tmp/influxdb
+rm -rf /tmp/influxdb-cli
+```
+To register an influxDb default config you can also run the following.
+```sh
+influx config create --config-name default \
+    --host-url "http://<ipaddr>:8086/" \
+    --org "<org>" \
+    --token "<token>" \
+    --active
+```
+
+#### **Install Grafana**
+```sh
+sudo apt-get install -y apt-transport-https
+sudo apt-get install -y software-properties-common wget
+sudo wget -q -O /usr/share/keyrings/grafana.key https://apt.grafana.com/gpg.key
+echo "deb [signed-by=/usr/share/keyrings/grafana.key] https://apt.grafana.com/ stable main" | sudo tee -a /etc/apt/sources.list.d/grafana.list
+sudo apt-get update
+sudo apt-get install grafana
+```
+Once you did that, you can start the daemon service.
+```sh
+sudo systemctl daemon-reload
+sudo systemctl start grafana-server
+sudo systemctl status grafana-server
+sudo systemctl enable grafana-server.service
+```
+
+In order to access them on your navigator, you will need to retrieve the private ip of your VM.
+- **Grafana**: `http://<ipaddr>:3000`
+- **Prometheus**: `http://<ipaddr>:9090`
+- **InfluxDB**: `http://<ipaddr>:8086`
+
+Influx will ask you to create a user.\
+Grafana will ask you to enter admin and admin, then set your own password.
 
 ----
 
