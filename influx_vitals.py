@@ -9,6 +9,7 @@ from services.cpu_service import ServiceCPU
 from services.disks_service import ServiceDisks
 from services.memory_service import ServiceMemory
 from services.network_service import ServiceNetwork
+# from urllib3.exceptions import ConnectTimeoutError
 
 with open('config.yaml', 'r') as config_file:
 	yamlConfig = yaml.load(config_file, Loader=yaml.FullLoader)
@@ -68,8 +69,13 @@ def send_vitals(jobconfig):
 		for query_index in range(len(queries)):
 			logger.write('{0}: SERVICE {1} -> {2}\n'.format(ts.isoformat(), service_name, queries[query_index]))
 	elif settings.ENVIRONMENT == ENVIRONMENT.PROD:
-		record = influx_query_builder(queries=queries, service_name=service_name, params=params)
-		write_api.write(bucket=settings.INFLUX_BUCKET, org=settings.INFLUX_ORG, record=record)
+		try:
+			record = influx_query_builder(queries=queries, service_name=service_name, params=params)
+			write_api.write(bucket=settings.INFLUX_BUCKET, org=settings.INFLUX_ORG, record=record)
+		except TimeoutError as e:
+			ts = datetime.datetime.now(datetime.timezone.utc)
+			logger(ts, ": ERROR - CONNECTION - ", e)
+			warnings.warn("The connection couldn\'t be established for service {service_name}, please verify your environements")
 
 
 def register_job(scheduler):
