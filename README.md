@@ -24,6 +24,8 @@ Note: It is also possible to run this script in a darwin system.
 
 The prerequisites will assume that you have virtualbox installed on your machine. You will need two virtual machine fully setup, with a Debian ISO, a Bridged Adapter network and with only the SSH server software.
 
+We will also assume that you know to setup your ssh to use your main machine terminal instead of the VM terminal.
+
 ----- 
 
 #### **The first machine** will host the python script.
