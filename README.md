@@ -45,9 +45,9 @@ echo command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH" >> ~/.pr
 echo eval "$(pyenv init -)" >> ~/.profile
 ```
 
-Once you have acces to pyenv in your terminal, install python 3.10.11 with **`sudo pyenv install 3.10`**, this will download a tar of specified version.\
-- If you're running into the error : **"no acceptable C compiler found in $PATH"**, just run **`sudo apt install build-essential`** then rerun the command.\
-- If you're running into an error where the last line is **"[Makefile:1280: install] Error 1"** and a bunch of array index referencing pip and numpy, try pasting the log file as follow : **`cat /tmp/python-build.<number>.<number>.log`** from the error log. If you can find **"no module named zlib"** in the log, run the following command **`sudo apt install zlib1g zlib1g-dev libssl-dev libbz2-dev libsqlite3-dev`** as stated in the wiki of [pyenv](https://github.com/pyenv/pyenv/wiki/Common-build-problems#build-failed-error-the-python-zlib-extension-was-not-compiled-missing-the-zlib), then rerun the command.
+Once you have acces to pyenv in your terminal, install python 3.10.11 with `sudo pyenv install 3.10`, this will download a tar of specified version.\
+- If you're running into the error : **"no acceptable C compiler found in $PATH"**, just run `sudo apt install build-essential` then rerun the command.\
+- If you're running into an error where the last line is **"[Makefile:1280: install] Error 1"** and a bunch of array index referencing pip and numpy, try pasting the log file as follow : `cat /tmp/python-build.<number>.<number>.log` from the error log. If you can find "no module named zlib" in the log, run the following command `sudo apt install zlib1g zlib1g-dev libssl-dev libbz2-dev libsqlite3-dev` as stated in the wiki of [pyenv](https://github.com/pyenv/pyenv/wiki/Common-build-problems#build-failed-error-the-python-zlib-extension-was-not-compiled-missing-the-zlib), then rerun the command.
 
 
 At this point you have installed python 3.10 with pyenv.
