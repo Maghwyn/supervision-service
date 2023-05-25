@@ -51,7 +51,7 @@ def send_vitals(jobconfig):
 	params = jobconfig.get('params')
 
 	queries = jobconfig.get('service_method')(
-		serviceKey=service_key,
+		service_key=service_key,
 		attr=jobconfig.get('attr'),
 		params=params,
 	)
