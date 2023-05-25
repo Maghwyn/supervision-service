@@ -9,7 +9,7 @@ class ENVIRONMENT:
 	PROD = 'production'
 
 class Settings():
-	""" Utils settings using ENVIRONMENTs variables
+	""" Utils settings using environments variables
 	"""
 	AGENT_NAME: str = env_loader["AGENT_NAME"]
 	TSDB_NAME: str = env_loader["TSDB_NAME"]
