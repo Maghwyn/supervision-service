@@ -2,6 +2,11 @@ import os
 from env_config import settings, DATABASE
 from influx_vitals import run_influx_vitals
 from prometheus_vitals import run_prometheus_vitals
+from sys import platform
+
+if platform == "darwin":
+	if os.getuid() != 0:
+		raise Exception('In darwin environment, it is required to run as sudo due to some psutil.AccessDenied')
 
 if not os.path.exists('logs.txt'):
 	os.mknod('logs.txt')
