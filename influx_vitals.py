@@ -30,19 +30,23 @@ services = {
 
 def influx_query_builder(queries, service_name: str, params):
 	for query_index in range(len(queries)):
-		point = influxdb_client.Point('system')
-		point.tag("agent", settings.AGENT_NAME)
-		point.tag(service_name, getattr(queries[query_index], 'tagValue'))
-		# this breaks if we have more than 1 params
-		if params is not None:
-			for key, value in params.items():
-				point.tag(key, value)
+		try:
+			point = influxdb_client.Point('system')
+			point.tag("agent", settings.AGENT_NAME)
+			point.tag(service_name, queries[query_index]['tagValue'])
+			# this breaks if we have more than 1 params
+			if params is not None:
+				for key, value in params.items():
+					point.tag(key, value)
 
-		for field in queries[query_index].get('fields'):
-			for key, value in field.items():
-				point.field(key, value)
+			for field in queries[query_index].get('fields'):
+				for key, value in field.items():
+					point.field(key, value)
 
-		return point
+			return point
+		except AttributeError as e:
+			ts = datetime.datetime.now(datetime.timezone.utc)
+			logger(ts, ": ERROR - SERVICE ",service_name, " - ", e)
 
 
 def send_vitals(jobconfig):
