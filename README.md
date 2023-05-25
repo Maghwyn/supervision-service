@@ -29,7 +29,7 @@ The prerequisites will assume that you have virtualbox installed on your machine
 #### **The first machine** will host the python script.
 Connect as a root and download sudo with `apt update && apt install sudo`.\
 Then run the following to add the user into the sudo group `usermod -aG sudo <yourUsername>` and logout the root user.\
-Login as <yourUSername> and install git with `sudo apt install git`. We also recommend to install python3-venv with `sudo apt install python3-venv`.
+Login as `<yourUSername>` and install git with `sudo apt install git`. We also recommend to install python3-venv with `sudo apt install python3-venv`.
 
 WARNING : If you're on python 3.7 or lower, this script will not work as psutil installation will fail. A simple solution if you do not want to upgrade your python version in your machine is to first install curl with `sudo apt install curl` and install pyenv-installer with `sudo curl https://pyenv.run | bash` from [pyenv-installer](https://github.com/pyenv/pyenv-installer). \
 You will then need to echo the following to .bashrc and .profile :
