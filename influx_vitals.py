@@ -1,8 +1,8 @@
-import time
+import datetime
 import yaml
 import influxdb_client
 import warnings
-from env_config import settings
+from env_config import settings, ENVIRONEMENT
 from influxdb_client.client.write_api import SYNCHRONOUS
 from apscheduler.schedulers.blocking import BlockingScheduler
 from services.cpu_service import ServiceCPU
@@ -28,6 +28,46 @@ services = {
 	ServiceNetwork.service_name: ServiceNetwork,
 }
 
+def influx_query_builder(queries, service_name: str, params):
+	for query_index in range(len(queries)):
+		point = influxdb_client.Point('system')
+		point.tag("agent", settings.AGENT_NAME)
+		point.tag(service_name, getattr(queries[query_index], 'tagValue'))
+		# this breaks if we have more than 1 params
+		if params is not None:
+			for key, value in params.items():
+				point.tag(key, value)
+
+		for field in queries[query_index].get('fields'):
+			for key, value in field.items():
+				point.field(key, value)
+
+		return point
+
+
+def send_vitals(jobconfig):
+	service_name = jobconfig.get('service_name')
+	service_key = jobconfig.get('service_key')
+	params = jobconfig.get('params')
+
+	queries = jobconfig.get('service_method')(
+		serviceKey=service_key,
+		attr=jobconfig.get('attr'),
+		params=params,
+	)
+	if not queries:
+		warnings.warn(f"Returned queries was empty for service method {service_key}")
+		return
+
+	if settings.ENVIRONEMENT == ENVIRONEMENT.DEV:
+		ts = datetime.datetime.now(datetime.timezone.utc)
+		for query_index in range(len(queries)):
+			logger.write('{0}: SERVICE {1} -> {2}\n'.format(ts.isoformat(), service_name, queries[query_index]))
+	elif settings.ENVIRONEMENT == ENVIRONEMENT.PROD:
+		record = influx_query_builder(queries=queries, service_name=service_name, params=params)
+		write_api.write(bucket=settings.INFLUX_BUCKET, org=settings.INFLUX_ORG, record=record)
+
+
 def register_job(scheduler):
 	vitalsServices = yamlConfig.get('services', None)
 	if vitalsServices is None:
@@ -44,20 +84,16 @@ def register_job(scheduler):
 				pass
 
 			if hasattr(service, method_name):
-				service_method = getattr(service, method_name)
-				queries = service_method(
-					serviceKey=method_name,
-					attr=method_config.get('attributes', None),
-					params=method_config.get('params', None),
-				)
-
-				if not queries:
-					warnings.warn(f"Returned queries was empty for service name {service}")
-					pass
-
-				print(method_name, queries)
+				jobconfig = {}
+				jobconfig.update({ "service_method": getattr(service, method_name) })
+				jobconfig.update({ "service_name": service_name })
+				jobconfig.update({ "service_key": method_name })
+				jobconfig.update({ "attr": method_config.get('attributes', None) })
+				jobconfig.update({ "params": method_config.get('params', None) })
+				interval = method_config.get('interval', 10)
+				scheduler.add_job(send_vitals, 'interval', seconds=interval, args=[jobconfig], id=method_name)
 			else:
-				warnings.warn(f"Psutil ${service} function does not exist or is not supported, please verify the yaml configuration file")
+				warnings.warn(f"Psutil ${method_name} function does not exist or is not supported, please verify the yaml configuration file")
 
 
 def run_influx_vitals():
