@@ -8,7 +8,8 @@ class ServiceDisks:
 	service_name = "disks"
 	pattern = r"[\\/]?dev[\\/](.+)"
 
-	def disk_usage(serviceKey: str, attr: Attributes):
+	def disk_usage(serviceKey: str, **kwargs):
+		attr: Attributes = kwargs['attr']
 		result = psutil.disk_partitions()
 
 		queries = []
@@ -25,12 +26,14 @@ class ServiceDisks:
 			if not active:
 				pass
 
-			fields = [{f"{serviceKey}-{disk_name}": diskusage[attr_name]} for disk_name, diskusage in diskParts.items()]
+			fields = [{f"{serviceKey}-{disk_name}": getattr(diskusage, attr_name, None)} for disk_name, diskusage in diskParts.items()]
 			queries.append({ "tagValue": attr_name, "fields": fields })
 
 		return queries
 
-	def disk_io_counters(serviceKey: str, attr: Attributes, perdisk = False):
+	def disk_io_counters(serviceKey: str, **kwargs):
+		attr: Attributes = kwargs['attr']
+		perdisk: bool = kwargs['params'].get('perdisk')
 		result = psutil.disk_io_counters(perdisk=perdisk, nowrap=True)
 		if not perdisk:
 			result = { "global": result }
@@ -40,7 +43,7 @@ class ServiceDisks:
 			if not active:
 				pass
 
-			fields = [{f"{serviceKey}-{disk_name}": diskio[attr_name]} for disk_name, diskio in result.items()]
+			fields = [{f"{serviceKey}-{disk_name}": getattr(diskio, attr_name, None)} for disk_name, diskio in result.items()]
 			queries.append({ "tagValue": attr_name, "fields": fields })
 
 		return queries
