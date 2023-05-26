@@ -1,6 +1,7 @@
 services:
  cpu:
   cpu_times:
+   interval: 10
    active: true
    params:
     percpu: true
@@ -9,10 +10,12 @@ services:
     system: true
     idle: true
   cpu_percent:
+   interval: 30
    active: true
    params:
     percpu: true
   cpu_times_percent:
+   interval: 30
    active: true
    params:
     percpu: true
@@ -21,6 +24,7 @@ services:
     system: true
     idle: true
   cpu_stats:
+   interval: 60
    active: true
    attributes:
     ctx_switches: true
@@ -29,6 +33,7 @@ services:
     syscalls: true
  disks:
   disk_usage:
+   interval: 10
    active: true
    attributes:
     total: true
@@ -36,6 +41,7 @@ services:
     free: true
     percent: true
   disk_io_counters:
+   interval: 30
    active: true
    params:
     perdisk: true
@@ -46,6 +52,7 @@ services:
     write_bytes: true
  memory:
   virtual_memory:
+   interval: 10
    active: true
    attributes:
     total: true
@@ -54,6 +61,7 @@ services:
     used: true
     free: true
   swap_memory:
+   interval: 10
    active: true
    attributes:
     total: true
@@ -64,6 +72,7 @@ services:
     sout: true
  network:
   net_io_counters:
+   interval: 10
    active: true
    params:
     pernic: true
@@ -77,6 +86,7 @@ services:
     dropin: true
     dropout: true
   net_connections:
+   interval: 30
    active: true
    params:
     kind: 'inet'
@@ -89,8 +99,10 @@ services:
     status: true
     pid: true
   net_if_addrs:
+   interval: 60
    active: false
   net_if_stats:
+   interval: 60
    active: true
    attributes:
     isup: true
