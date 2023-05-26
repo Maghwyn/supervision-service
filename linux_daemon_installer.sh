@@ -45,5 +45,6 @@ read setup;
 if [[ $setup == "Y" || $setup == "y" ]]; then
 	sudo systemctl daemon-reload;
 	sudo systemctl start $file_name.service;
+	sudo systemctl enable $file_name.service;
 	sudo systemctl status $file_name.service;
 fi
