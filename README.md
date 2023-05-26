@@ -215,6 +215,7 @@ If you're using the daemon instead and did not accept the script to launch the d
 ```sh
 sudo systemctl daemon-reload
 sudo systemctl start vitals.service
+sudo systemctl enable vitals.service
 sudo systemctl status vitals.service
 ```
 
