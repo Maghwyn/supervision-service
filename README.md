@@ -169,7 +169,7 @@ To install and setup the script, follow the instruction :
    ```
 6. Install the python library
    ```sh
-   .venv/bin/pip3 install -r requirements
+   .venv/bin/pip3 install -r requirements.txt
    ```
 7. Create your environment
     ```sh
@@ -196,6 +196,9 @@ To install and setup the script, follow the instruction :
 
 **ENVIRONMENT="dev"** will write the metrics of psutil in the logs.txt.\
 **ENVIRONMENT="production"** will send the metrics to influx or prometheus.
+
+If you encounter an error with psutil not being installed due to a missing module.
+Install the following `sudo apt-get -y install gcc python3-dev`.
 
 
 
