@@ -58,9 +58,9 @@ You can check your installed version of python with `ls ~/.pyenv/versions/`
 
 #### **Install prometheus node_exporter**
 
-In order to use node_exporter and export some metrics to prometheus without a script.
-You can add the node_exporter that will open a port on your `<ipaddr>:9100`.
-First, install wget with `apt-get -y install wget` and do run the following to download node_exporter tar.
+In order to use node_exporter and export some metrics to prometheus without a script.\
+You can add the node_exporter that will open a port on your `<ipaddr>:9100`.\
+First, install wget with `apt-get -y install wget` and run the following to download node_exporter tar.
 
 ```sh
 sudo apt-get install wget
@@ -183,8 +183,8 @@ Grafana will ask you to enter admin and admin, then set your own password.
 
 #### **Scrape prometheus node_exporter**
 
-If you have installed node_exporter on the first machine, you now have an open port on `http://<agentipaddr:9100`.
-To scrape the metrics from that VM, you will need to edit `prometheus.yml` in this machine.
+If you have installed node_exporter on the first machine, you now have an open port on `http://<agentipaddr>:9100`.\
+To scrape the metrics from that VM, you will need to edit `prometheus.yml` in this machine.\
 Open the file with write permission `sudo nano /etc/prometheus/prometheus.yml` and add the following under scrape_configs.
 
 ```sh
@@ -196,7 +196,7 @@ scrape_configs:
       - targets: ["<agentipaddr>:9100"]
 ```
 
-This will tell prometheus to scrape the metrics of your specified agents based of an interval defined in the global section `scrape_interval`.
+This will tell prometheus to scrape the metrics of your specified agents based of an interval defined in the global section `scrape_interval`.\
 Restart prometheus with `sudo systemctl restart prometheus` and you're set.
 
 ----
