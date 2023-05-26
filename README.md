@@ -33,7 +33,7 @@ Connect as a root and download sudo with `apt update && apt-get -y install sudo`
 Then run the following to add the user into the sudo group `usermod -aG sudo <yourUsername>` and logout the root user.\
 Login as `<yourUSername>` and install git with `sudo apt-get -y install git`. We also recommend to install python3-venv with `sudo apt-get -y install python3-venv`.
 
-WARNING : If you're on python 3.7 or lower, this script will not work as psutil installation will fail. A simple solution if you do not want to upgrade your python version in your machine is to first install curl with `sudo apt-get -y install curl` and install pyenv-installer with `sudo curl https://pyenv.run | bash` from [pyenv-installer](https://github.com/pyenv/pyenv-installer). \
+NOTE : We used python 3.10 for this project, if you wish to use it without upgrading the python version in your machine, you can first install curl with `sudo apt-get -y install curl` and install pyenv-installer with `sudo curl https://pyenv.run | bash` from [pyenv-installer](https://github.com/pyenv/pyenv-installer). \
 You will then need to echo the following to .bashrc and .profile :
 ```sh
 echo export PYENV_ROOT="$HOME/.pyenv" >> ~/.bashrc &&
@@ -55,6 +55,47 @@ Once you have access to pyenv in your terminal, install python 3.10 with `sudo p
 At this point you have installed python 3.10 with pyenv.
 You can check your installed version of python with `ls ~/.pyenv/versions/`
 (more information about pyenv during the installation)
+
+#### **Install prometheus node_exporter**
+
+In order to use node_exporter and export some metrics to prometheus without a script.
+You can add the node_exporter that will open a port on your `<ipaddr>:9100`.
+First, install wget with `apt-get -y install wget` and do run the following to download node_exporter tar.
+
+```sh
+sudo apt-get install wget
+mkdir /tmp/prometheus && cd /tmp/prometheus
+sudo curl -s https://api.github.com/repos/prometheus/node_exporter/releases/latest| sudo grep browser_download_url| sudo grep linux-amd64| sudo cut -d '"' -f 4| sudo wget -qi -
+tar -xvf node_exporter*.tar.gz
+cd  node_exporter*/
+sudo cp node_exporter /usr/local/bin
+
+cd ~/
+rm -rf /tmp/prometheus
+```
+You can now create a daemon service for simplicity with `sudo nano /etc/systemd/system/node_exporter.service` and write the following in the service.
+```
+[Unit]
+Description=Node Exporter
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+User=<yourUser>
+ExecStart=/usr/local/bin/node_exporter
+
+[Install]
+WantedBy=default.target
+```
+Then simply start the daemon.
+```
+sudo systemctl daemon-reload
+sudo systemctl start node_exporter
+sudo systemctl enable node_exporter
+sudo systemctl status node_exporter.service
+```
+
+To retrieve the metrics on prometheus (second VM) from the agent (first VM), it will be explained below on the second machine prerequisites.
 
 ----
 
@@ -139,6 +180,24 @@ In order to access them on your navigator, you will need to retrieve the private
 
 Influx will ask you to create a user.\
 Grafana will ask you to enter admin and admin, then set your own password.
+
+#### **Scrape prometheus node_exporter**
+
+If you have installed node_exporter on the first machine, you now have an open port on `http://<agentipaddr:9100`.
+To scrape the metrics from that VM, you will need to edit `prometheus.yml` in this machine.
+Open the file with write permission `sudo nano /etc/prometheus/prometheus.yml` and add the following under scrape_configs.
+
+```sh
+scrape_configs:
+  #... other job_name
+
+  - job_name: "node_exporter"
+    static_configs:
+      - targets: ["<agentipaddr>:9100"]
+```
+
+This will tell prometheus to scrape the metrics of your specified agents based of an interval defined in the global section `scrape_interval`.
+Restart prometheus with `sudo systemctl restart prometheus` and you're set.
 
 ----
 
