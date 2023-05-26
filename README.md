@@ -196,7 +196,8 @@ scrape_configs:
       - targets: ["<agentipaddr>:9100"]
 ```
 
-This will tell prometheus to scrape the metrics of your specified agents based of an interval defined in the global section `scrape_interval`.\
+This will tell prometheus to scrape the metrics of your specified agents.\
+You can modify the interval of those task in the global section where `scrape_interval: <number>s`.\
 Restart prometheus with `sudo systemctl restart prometheus` and you're set.
 
 ----
